@@ -1,0 +1,1 @@
+python ./src/generator.py -m train -vr 500 1020 20 -cr 1 11 1 -rr 100 520 20 -nl 4

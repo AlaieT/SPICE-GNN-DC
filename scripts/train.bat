@@ -1,0 +1,1 @@
+python ./src/train.py -f ./assets/train.csv -e 500 -bt 128 -bv 128
