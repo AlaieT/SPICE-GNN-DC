@@ -120,9 +120,9 @@ List of available scripts:
 ### Train loss, Acc@1 metrick, Acc@2 metrik
 
 <p float="left">
-  <img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/loss.jpg' alt='drawing' width='150'/>
-  <img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/acc1.png' alt='drawing' width="150"/>
-  <img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/acc2.png' alt='drawing' width="150"/>
+  <img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/train.png' alt='drawing' width='250'/>
+  <img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/acc1.png' alt='drawing' width="250"/>
+  <img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/acc2.png' alt='drawing' width="250"/>
 </p>
 
 ### L2Error loss surface
