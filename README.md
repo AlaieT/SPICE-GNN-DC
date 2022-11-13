@@ -21,7 +21,7 @@ If there is no transistor then there is no standart cell that describes logical 
 So what is left it's - `power grid` of integrated circuit.
 
 <p align='center'>
-<image src='https://github.com/AlaieT/SPICE-GNN/tree/picts/power_grid.png'/>
+<image src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/power_grid.png'/>
 <p align='center'>Example of power grid</p>
 <p>
 
@@ -84,7 +84,7 @@ But in order to have hight accurasy values we need more proper regression loss f
 For this we need such type of loss function, that can better focuse on small values.
 I made function that can preform better than any of standart regression ones, its called `L2Error`.
 
-![](https://github.com/AlaieT/SPICE-GNN/tree/picts/loss.jpg)
+![](https://github.com/AlaieT/SPICE-GNN/blob/main/picts/loss.jpg)
 
 Where x - predicted values, y - ground truth values and p - model parameters(aka neurons)
 
@@ -94,7 +94,7 @@ We whant to recive hight accurasy values from model, then we have properly valid
 The best wariant is use so called `Acc@k` or top k accurasy metric.  
 This metric used in multy label calssification tasks, but i rebuilded it to our porpuses.
 
-![](https://github.com/AlaieT/SPICE-GNN/tree/picts/metric.jpg)
+![](https://github.com/AlaieT/SPICE-GNN/blob/main/picts/metric.jpg)
 
 Where k - number presission, x - predicted value, y - ground truth value.  
 If `(x - y)` rounded to k presission is larger then 0 its return 1 otherwise 0.
@@ -119,19 +119,19 @@ List of available scripts:
 
 ### Train loss
 
-<img src='https://github.com/AlaieT/SPICE-GNN/tree/picts/loss.png' alt='drawing' width='500'/>
+<img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/loss.png' alt='drawing' width='500'/>
 
 ### Acc@1 metrick
 
-<img src='https://github.com/AlaieT/SPICE-GNN/tree/picts/acc1.png' alt='drawing' width="500"/>
+<img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/acc1.png' alt='drawing' width="500"/>
 
 ### Acc@2 metrik
 
-<img src='https://github.com/AlaieT/SPICE-GNN/tree/picts/acc2.png' alt='drawing' width="500"/>
+<img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/acc2.png' alt='drawing' width="500"/>
 
 ### L2Error loss surface
 
-<img src='https://github.com/AlaieT/SPICE-GNN/tree/picts/deep_nn_loss_log_surface.gif' alt='drawing' width='500'/>
+<img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/deep_nn_loss_log_surface.gif' alt='drawing' width='500'/>
                    
 ## Tasks
 
