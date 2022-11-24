@@ -110,9 +110,9 @@ if __name__ == '__main__':
     set_seed(seed=42)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = DeepIRDrop(in_channels=8, hidden_channels=64, out_channels=1, num_gcl=3).to(device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-5)
-    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=1-1e-5)
+    model = DeepIRDrop(in_channels=8, hidden_channels=48, out_channels=1, num_gcl=3).to(device)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-5)
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=1-1e-6)
     criterion = L2Error()
 
     metric = np.zeros((0, 4 + 3*len(folds)))
@@ -120,12 +120,12 @@ if __name__ == '__main__':
 
     get_model_size(model)
 
-    dataset_train = CircuitDataset(train_pack_path, resave=resave, train=resave, device=device, scaler_path='./dict/scaler/big.joblib')
+    dataset_train = CircuitDataset(train_pack_path, resave=resave, train=resave, device=device, scaler_path='./dict/scaler/min_max.joblib')
     dataloader_train = DataLoader(dataset=dataset_train, batch_size=batch_size_train, shuffle=True)
 
     folds_dataloders: List[DataLoader] = []
     for fold in folds:
-        dataset_valid_out = CircuitDataset(fold, resave=resave, train=False, device=device, scaler_path='./dict/scaler/big.joblib')
+        dataset_valid_out = CircuitDataset(fold, resave=resave, train=False, device=device, scaler_path='./dict/scaler/min_max.joblib')
         folds_dataloders.append(DataLoader(dataset=dataset_valid_out, batch_size=batch_size_valid, shuffle=False))
 
     print(f'\nStart traning on {epochs} epochs\n')

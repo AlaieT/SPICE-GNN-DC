@@ -62,14 +62,14 @@ class DeepGGALayer(torch.nn.Module):
 
         for i in range(block_size):
             self.convs.append(GGAConv(hidden_channels, hidden_channels))
-            self.norms.append(GraphNorm(hidden_channels))
+            # self.norms.append(GraphNorm(hidden_channels))
 
     def forward(self, x: Tensor, edge_index: Tensor, *args, **kwargs) -> Tensor:
         h = x
 
         for i in range(self.block_size):
             x = self.convs[i](x, edge_index, *args, **kwargs)
-            x = self.norms[i](x, *args, **kwargs)
+            # x = self.norms[i](x, *args, **kwargs)
 
             if i < self.block_size - 1:
                 x = F.relu(x) + self.eps

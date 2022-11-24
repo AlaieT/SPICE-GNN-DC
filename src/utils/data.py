@@ -41,7 +41,7 @@ class CircuitDataset(Dataset):
         self.dataset = []
 
         data = pd.read_csv(file_path)
-        scaler = MinMaxScaler(feature_range=(0, 1)) if train else load(scaler_path)
+        scaler = MinMaxScaler(feature_range=(-0.5, 0.5)) if train else load(scaler_path)
         fit_x = torch.empty((0, 8)) if train else None
 
         for _, row in tqdm(data.iterrows(), bar_format='{l_bar}{bar:20}{r_bar}{bar:-20b}', total=len(data), disable=not show_progress):
