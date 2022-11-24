@@ -80,10 +80,14 @@ class GridCell():
 
 
 def generate_data(
-        mode='train', circuit_type='grid', data_path='./assets/train/', volt_range=(500, 1000, 20),
-        cells_range=(2, 6, 1),
-        num_layers=1, res_range=(10, 200, 10),
-        via_drop=0.0):
+    mode: str = 'train',
+    data_path: str = './assets/train/',
+    volt_range: Tuple[int, int, int] = (500, 1000, 20),
+    cells_range: Tuple[int, int, int] = (2, 6, 1),
+    num_layers: int = 1,
+    res_range: Tuple[int, int, int] = (10, 200, 10),
+    via_drop=0.0
+):
 
     edges = [[1, 1, 1, 1], [0, 1, 1, 1], [1, 1, 1, 0], [0, 0, 1, 1]]
     current = [[0, 1, 1, 1], [0, 0, 1, 1], [0, 1, 1, 0], [0, 0, 1, 0]]
@@ -93,107 +97,108 @@ def generate_data(
     count = 0
 
     for volt in range(volt_range[0], volt_range[1], volt_range[2]):
-        for s in range(cells_range[0], cells_range[1], cells_range[2]):
-            for l in range(num_layers):
-                for res_value in range(res_range[0], res_range[1], res_range[2]):
-                    cells: List[GridCell] = []
-                    size = [s, s, l + 1]
-                    next_layer = None
-                    res_value = res_value/1000 * (1 - 0.2 * l / num_layers)
-                    current_value = (volt/200)/((4*res_value + 3*(size[0]) * res_value + 3*(size[1]) * res_value + (size[0])*(size[1]) * 2 * res_value) * 2)
-                    volt_value = volt/100
+        for l in range(1, num_layers + 1):
+            for x in range(cells_range[0], cells_range[1] + 1, cells_range[2]):
+                for y in range(cells_range[0], cells_range[1] + 1, cells_range[2]):
+                    for res_value in range(res_range[0], res_range[1], res_range[2]):
+                        cells: List[GridCell] = []
+                        size = [x, y, l]
+                        next_layer = None
+                        res_value = res_value/1000 * (1 - 0.2 * l / num_layers)
+                        current_value = (volt/200)/((4*res_value + 3*(size[0]) * res_value + 3*(size[1]) * res_value + (size[0])*(size[1]) * 2 * res_value) * 2)
+                        volt_value = volt/100
 
-                    for z in range(size[-1]):
-                        if z < size[-1] - 1:
-                            next_layer = z + 1
-                        else:
-                            next_layer = None
+                        for z in range(size[-1]):
+                            if z < size[-1] - 1:
+                                next_layer = z + 1
+                            else:
+                                next_layer = None
 
-                        for i in range(size[0]):
-                            for j in range(size[1]):
-                                cell_volt = None
-                                cell_res = res_value
-                                cell_current = current_value
+                            for i in range(size[0]):
+                                for j in range(size[1]):
+                                    cell_volt = None
+                                    cell_res = res_value * (1 + uniform(-0.15, 0.15))
+                                    cell_current = current_value
 
-                                if i == 0 and j == 0:
-                                    cells.append(
-                                        GridCell(
-                                            position=[i, j],
-                                            layer=z,
-                                            next_layer=next_layer,
-                                            res_value=cell_res,
-                                            current_value=cell_current,
-                                            volt_value=cell_volt,
-                                            edges=edges[0],
-                                            current=current[0] if z == 0 else None,
-                                            vias=vias[0],
-                                            via_dropout=via_drop,
-                                        ))
-                                elif i == 0:
-                                    cells.append(
-                                        GridCell(
-                                            position=[i, j],
-                                            layer=z,
-                                            next_layer=next_layer,
-                                            res_value=cell_res,
-                                            current_value=cell_current,
-                                            volt_value=cell_volt,
-                                            edges=edges[1],
-                                            current=current[1] if z == 0 else None,
-                                            vias=vias[1],
-                                            via_dropout=via_drop,
-                                        ))
-                                elif j == 0:
-                                    cells.append(
-                                        GridCell(
-                                            position=[i, j],
-                                            layer=z,
-                                            next_layer=next_layer,
-                                            res_value=cell_res,
-                                            current_value=cell_current,
-                                            volt_value=cell_volt,
-                                            edges=edges[2],
-                                            current=current[2] if z == 0 else None,
-                                            vias=vias[2],
-                                            via_dropout=via_drop,
-                                        ))
-                                else:
-                                    cells.append(
-                                        GridCell(
-                                            position=[i, j],
-                                            layer=z,
-                                            next_layer=next_layer,
-                                            res_value=cell_res,
-                                            current_value=cell_current,
-                                            volt_value=cell_volt,
-                                            edges=edges[3],
-                                            current=current[3] if z == 0 else None,
-                                            vias=vias[3],
-                                            via_dropout=via_drop,
-                                        ))
+                                    if i == 0 and j == 0:
+                                        cells.append(
+                                            GridCell(
+                                                position=[i, j],
+                                                layer=z,
+                                                next_layer=next_layer,
+                                                res_value=cell_res,
+                                                current_value=cell_current,
+                                                volt_value=cell_volt,
+                                                edges=edges[0],
+                                                current=current[0] if z == 0 else None,
+                                                vias=vias[0],
+                                                via_dropout=via_drop,
+                                            ))
+                                    elif i == 0:
+                                        cells.append(
+                                            GridCell(
+                                                position=[i, j],
+                                                layer=z,
+                                                next_layer=next_layer,
+                                                res_value=cell_res,
+                                                current_value=cell_current,
+                                                volt_value=cell_volt,
+                                                edges=edges[1],
+                                                current=current[1] if z == 0 else None,
+                                                vias=vias[1],
+                                                via_dropout=via_drop,
+                                            ))
+                                    elif j == 0:
+                                        cells.append(
+                                            GridCell(
+                                                position=[i, j],
+                                                layer=z,
+                                                next_layer=next_layer,
+                                                res_value=cell_res,
+                                                current_value=cell_current,
+                                                volt_value=cell_volt,
+                                                edges=edges[2],
+                                                current=current[2] if z == 0 else None,
+                                                vias=vias[2],
+                                                via_dropout=via_drop,
+                                            ))
+                                    else:
+                                        cells.append(
+                                            GridCell(
+                                                position=[i, j],
+                                                layer=z,
+                                                next_layer=next_layer,
+                                                res_value=cell_res,
+                                                current_value=cell_current,
+                                                volt_value=cell_volt,
+                                                edges=edges[3],
+                                                current=current[3] if z == 0 else None,
+                                                vias=vias[3],
+                                                via_dropout=via_drop,
+                                            ))
 
-                    if not os.path.exists(os.path.join(data_path, f'ibmpg{count}')):
-                        os.mkdir(os.path.join(data_path, f'ibmpg{count}'))
+                        if not os.path.exists(os.path.join(data_path, f'ibmpg{count}')):
+                            os.mkdir(os.path.join(data_path, f'ibmpg{count}'))
 
-                    with open(os.path.join(data_path, f'ibmpg{count}/ibmpg{count}.spice'), 'w') as file:
-                        file.write(f'* {mode}_ibm_{count}\n')
+                        with open(os.path.join(data_path, f'ibmpg{count}/ibmpg{count}.spice'), 'w') as file:
+                            file.write(f'* {mode}_ibm_{count}\n')
 
-                        file.write(f"rv0 n{size[-1]- 1}_0_0 _X_n{size[-1] - 1}_0_0 0.25\n")
-                        file.write(f"vv0 _X_n{size[-1] - 1}_0_0 0 {volt_value}\n")
+                            file.write(f"rv0 n{size[-1]- 1}_0_0 _X_n{size[-1] - 1}_0_0 0.25\n")
+                            file.write(f"vv0 _X_n{size[-1] - 1}_0_0 0 {volt_value}\n")
 
-                        for idx, cell in enumerate(cells):
-                            file.write(f'* Cell: {idx}\n')
-                            file.writelines(cell.get_disc())
+                            for idx, cell in enumerate(cells):
+                                file.write(f'* Cell: {idx}\n')
+                                file.writelines(cell.get_disc())
 
-                        file.close()
+                            file.close()
 
-                        files.append([os.path.join(data_path, f'ibmpg{count}/ibmpg{count}.spice'),
-                                      os.path.join(data_path, f'ibmpg{count}/ibmpg{count}.csv'), size[0]*size[1], volt_value])
+                            files.append([os.path.join(data_path, f'ibmpg{count}/ibmpg{count}.spice'),
+                                          os.path.join(data_path, f'ibmpg{count}/ibmpg{count}.csv'), size[0]*size[1], volt_value])
 
-                        if os.path.exists(os.path.join(data_path, f'ibmpg{count}/ibmpg{count}.csv')):
-                            os.remove(os.path.join(data_path, f'ibmpg{count}/ibmpg{count}.csv'))
+                            if os.path.exists(os.path.join(data_path, f'ibmpg{count}/ibmpg{count}.csv')):
+                                os.remove(os.path.join(data_path, f'ibmpg{count}/ibmpg{count}.csv'))
 
-                        count += 1
+                            count += 1
 
     df = pd.DataFrame(data=files, columns=['Source', 'Target', 'Cells', 'Voltage'])
     df.to_csv(os.path.join('./assets', f'{mode}.csv'))

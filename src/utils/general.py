@@ -1,11 +1,20 @@
 __author__ = 'Alaie Titor'
-__all__ = ['generated_data_info', 'init_directions', 'init_network', 'generate_folders']
+__all__ = ['generated_data_info', 'init_directions', 'init_network', 'generate_folders', 'get_model_size']
 
 from cmath import inf
 import torch
 import numpy as np
 import pandas as pd
 import os
+from typing import List
+
+def get_model_size(model: torch.nn.Module):
+    n_params = 0
+    for _, param in model.named_parameters():
+        n_params += np.prod(param.size())
+
+    print(f'A total of {n_params:,} model parameters.\n')  
+
 
 def generate_folders(mode: str = 'train', **kwargs):
     if mode == 'train':
@@ -27,10 +36,14 @@ def generate_folders(mode: str = 'train', **kwargs):
     elif mode == 'analysis':
         if not os.path.exists('./plots'):
             os.mkdir('./plots')
-        if not os.path.exists('./plots/circuit/'):
-            os.mkdir('./plots/circuit/')
         if not os.path.exists('./plots/model/'):
                 os.mkdir('./plots/model/')
+
+    elif mode == 'test':
+        if not os.path.exists('./plots'):
+            os.mkdir('./plots')
+        if not os.path.exists('./plots/test'):
+            os.mkdir('./plots/test')
 
 
 def generated_data_info(file_name:str):
@@ -75,7 +88,7 @@ def generated_data_info(file_name:str):
         print(f"Filename: {neg}")
 
 
-def init_directions(model, device):
+def init_directions(model: torch.nn.Module, device: torch.device):
     noises = []
 
     n_params = 0
@@ -102,7 +115,7 @@ def init_directions(model, device):
     return noises
 
 
-def init_network(model, all_noises, alpha, beta):
+def init_network(model: torch.nn.Module, all_noises: List, alpha: float, beta: float):
     with torch.no_grad():
         for param, noises in zip(model.parameters(), all_noises):
             delta, nu = noises

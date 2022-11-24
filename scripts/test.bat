@@ -1,0 +1,1 @@
+python ./src/test.py -f ./assets/test_fold1.csv ./assets/test_fold2.csv ./assets/test_fold3.csv -mp ./dict/dnn/best.pt -bs 8

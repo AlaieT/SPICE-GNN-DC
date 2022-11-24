@@ -15,6 +15,7 @@ NODE_TYPES = {
     '0': 1,
     "R": 2,
     "r": 2,
+    "V": 2,
     "v": 3,
     'i': 4
 }
@@ -49,7 +50,7 @@ def _exists(_dict: Dict[str, any], _key: str) -> bool:
 
 
 class Node():
-    def __init__(self, name, number, type, value) -> None:
+    def __init__(self, name: str, number: int, type: int, value: float = 0.0) -> None:
         self.__name: str = name
         self.__number: int = number
         self.__type: int = type
@@ -81,7 +82,7 @@ class Node():
         if connection not in self.__connections:
             self.__connections.append(connection)
 
-    def set_value(self, value):
+    def set_value(self, value: float):
         '''Set value of node'''
         self.__value = value
 
@@ -114,22 +115,19 @@ def spice_to_graph(source_filename: str, target_filename: Optional[str] = None, 
                             nodes[splited_line[2]] = Node(splited_line[2], node_number, NODE_TYPES[splited_line[2][0]], 0.0)
                             node_number += 1
 
-                        if line[0] != 'V':
-                            if not _exists(nodes, splited_line[0]):
-                                nodes[splited_line[0]] = Node(splited_line[0], node_number, NODE_TYPES[line[0]], float(node_value))
-                                node_number += 1
 
-                                if nodes[splited_line[0]].get_type() == NODE_TYPES['v'] and max_voltage < nodes[splited_line[0]].get_value():
-                                    max_voltage = nodes[splited_line[0]].get_value()
+                        if not _exists(nodes, splited_line[0]):
+                            nodes[splited_line[0]] = Node(splited_line[0], node_number, NODE_TYPES[line[0]], float(node_value))
+                            node_number += 1
 
-                            nodes[splited_line[0]].add_connection(nodes[splited_line[1]].get_number())
-                            nodes[splited_line[0]].add_connection(nodes[splited_line[2]].get_number())
+                            if nodes[splited_line[0]].get_type() == NODE_TYPES['v'] and max_voltage < nodes[splited_line[0]].get_value():
+                                max_voltage = nodes[splited_line[0]].get_value()
 
-                            nodes[splited_line[1]].add_connection(nodes[splited_line[0]].get_number())
-                            nodes[splited_line[2]].add_connection(nodes[splited_line[0]].get_number())
-                        else:
-                            nodes[splited_line[1]].add_connection(nodes[splited_line[2]].get_number())
-                            nodes[splited_line[2]].add_connection(nodes[splited_line[1]].get_number())
+                        nodes[splited_line[0]].add_connection(nodes[splited_line[1]].get_number())
+                        nodes[splited_line[0]].add_connection(nodes[splited_line[2]].get_number())
+
+                        nodes[splited_line[1]].add_connection(nodes[splited_line[0]].get_number())
+                        nodes[splited_line[2]].add_connection(nodes[splited_line[0]].get_number())
 
             file.close()
 
@@ -142,7 +140,6 @@ def spice_to_graph(source_filename: str, target_filename: Optional[str] = None, 
                 target = np.zeros((0, 1))
 
                 for idx, node in enumerate(nodes.values()):
-
                     x[idx, node.get_type()] = 1.0
 
                     if node.get_type() == NODE_TYPES['R']:

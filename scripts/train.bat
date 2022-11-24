@@ -1,1 +1,3 @@
-python ./src/train.py -f ./assets/train.csv -e 500 -bt 128 -bv 128
+python ./src/train.py -ft ./assets/train_big.csv -fv ./assets/fold0_big.csv ./assets/fold1_big.csv ./assets/fold2_big.csv ./assets/fold3_big.csv -e 1000 -bt 32 -bv 8
+@REM python ./src/train.py -ft ./assets/train_exp.csv -fv ./assets/fold0_exp.csv ./assets/fold1_exp.csv ./assets/fold2_exp.csv ./assets/fold3_exp.csv -e 1000 -bt 32 -bv 64
+@REM python ./src/train.py -ft ./assets/train_exp.csv -fv ./assets/fold0_exp.csv ./assets/fold1_exp.csv -e 1000 -bt 32 -bv 64

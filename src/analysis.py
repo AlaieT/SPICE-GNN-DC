@@ -9,19 +9,17 @@ import os
 from sklearn.model_selection import train_test_split
 
 from models import DeepIRDrop, L2Error
-from utils import (CircuitDataset, init_directions, init_network, plot_surface_of_loss, generated_data_info, plot_circuit_heatmap, generate_folders)
+from utils import (CircuitDataset, init_directions, init_network, plot_surface_of_loss, generated_data_info, generate_folders)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Analysis of generated data and model')
     parser.add_argument('-gd', '--generated_data', nargs='?', const=True, help='Analysis of generated data. Requres path to .csv file of generated data.')
-    parser.add_argument('-ch', '--circuit_heatmap', nargs='?', const=True, help='Analysis of circuit voltage dropout using heatmap. Requires path to train dataset .csv file.')
     parser.add_argument('-ls', '--loss_surface', nargs='?', const=True, help='Analysis of dependencies of train loss function from model parametres. Requires path to the dataset .csv')
     parser.add_argument('-p', '--path', nargs='?', default='', help='Target file or folder to analysis')
     namespace = parser.parse_args()
 
     generated_data = namespace.generated_data
-    circuit_heatmap = namespace.circuit_heatmap
     loss_surface = namespace.loss_surface
     path = namespace.path
 
@@ -32,9 +30,6 @@ if __name__ == '__main__':
     if generated_data and path:
         generated_data_info(file_name=path)
 
-    elif circuit_heatmap and path:
-        plot_circuit_heatmap(filename=path, save_path=f'./plots/circuit/{path.split("/")[-1][:-4]}')
-
     elif loss_surface and path:
         if os.path.exists('./dict/dnn/best.pt'):
             RESOLUTION = 25
@@ -44,7 +39,7 @@ if __name__ == '__main__':
             model = DeepIRDrop(in_channels=8, hidden_channels=64, out_channels=1, num_gcl=4).eval().to(device)
             criterion = L2Error()
 
-            _, data = train_test_split(pd.read_csv(path), train_size=0.8, test_size=0.2, shuffle=True, random_state=42)
+            data = pd.read_csv(path)
             dataset = CircuitDataset(data, resave=False, train=False)
             dataloader = DataLoader(dataset=dataset, batch_size=BATCH_SIZE, shuffle=False)
             

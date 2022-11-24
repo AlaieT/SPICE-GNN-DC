@@ -1,14 +1,13 @@
 __author__ = 'Alaie Titor'
-__all__ = ['Extractor', 'GGAConv', 'Decoder']
+__all__ = ['Extractor', 'Decoder', 'Encoder']
 
-import copy
+
 import torch
 import torch.nn.functional as F
 from torch import Tensor
-from torch.nn import BatchNorm1d, ModuleList
+from torch.nn import ModuleList
 from torch.utils.checkpoint import checkpoint
-from torch_geometric.nn import MessageNorm, MessagePassing, DeepGCNLayer
-from typing import List
+from torch_geometric.nn import MessagePassing, GraphNorm, MessageNorm
 from .mlp import MLP
 
 
@@ -16,129 +15,114 @@ class GGAConv(MessagePassing):
     def __init__(
             self,
             in_channels: int,
-            hidden_channels: int,
             out_channels: int,
-            aggr: str = 'softmax',
-            learn_t: bool = True,
-            t: float = 1.0,
-            num_layers: int = 2,
-            dropout: float = 0.0,
-            eps: float = 1e-7):
+            aggr: str = 'powermean',
+            learn_param: bool = True,
+            param: float = 1.0,
+            eps: float = 1e-5):
 
         aggr_kwargs = {}
         if aggr == 'softmax':
-            aggr_kwargs = dict(t=t, learn=learn_t)
+            aggr_kwargs = dict(t=param, learn=learn_param)
+        if aggr == 'powermean':
+            aggr_kwargs = dict(p=param, learn=learn_param)
 
         super().__init__(aggr=aggr, aggr_kwargs=aggr_kwargs)
 
-        channels = [in_channels] + [hidden_channels * 2 for _ in range(num_layers - 1)] + [out_channels]
+        channels = [in_channels, in_channels, out_channels]
 
         self.eps = eps
         self.in_channels = in_channels
-        self.hidden_channels = hidden_channels
         self.out_channels = out_channels
-        self.msg_norm = MessageNorm(True)
-        self.mlp = MLP(channels=channels, dropout=dropout)
+        self.msg_norm = MessageNorm(False)
+        self.mlp = MLP(channels=channels)
 
-    def forward(self, x: Tensor, edge_index: Tensor) -> Tensor:
+    def forward(self, x: Tensor, edge_index: Tensor, *args, **kwargs) -> Tensor:
         x = (x, x)
         out = self.propagate(x=x, edge_index=edge_index)
         out = self.msg_norm(x[0], out)
-        out += x[1]
+        out = out + x[1]
 
-        return self.mlp(out)
+        return self.mlp(out, *args, **kwargs)
 
     def message(self, x_i: Tensor, x_j: Tensor) -> Tensor:
-        msg = x_j
-        return msg.relu() + self.eps
+        return x_j.relu() + self.eps
 
 
 class DeepGGALayer(torch.nn.Module):
-    def __init__(self, hidden_channels: int, ckpt_grad: bool = False, block_size: int = 2, dropout: float = 0.0, eps=1e-7) -> None:
+    def __init__(self, hidden_channels: int, block_size: int = 2, eps: float = 1e-5) -> None:
         super().__init__()
 
-        self.dropout = dropout
         self.eps = eps
-        self.ckpt_grad = ckpt_grad
         self.block_size = block_size
-
+        self.hidden_channels = hidden_channels
         self.convs = ModuleList()
         self.norms = ModuleList()
+        self.exp_lin = MLP(channels=[hidden_channels, hidden_channels * 2])
 
         for i in range(block_size):
-            self.convs.append(GGAConv(hidden_channels, hidden_channels, hidden_channels))
-            self.norms.append(BatchNorm1d(hidden_channels, affine=True))
+            self.convs.append(GGAConv(hidden_channels, hidden_channels))
+            self.norms.append(GraphNorm(hidden_channels))
 
-    def forward(self, *args, **kwargs) -> Tensor:
-        args = list(args)
-        x: Tensor = args.pop(0)
-
-        intter = x
+    def forward(self, x: Tensor, edge_index: Tensor, *args, **kwargs) -> Tensor:
+        h = x
 
         for i in range(self.block_size):
-            if self.ckpt_grad and x.requires_grad:
-                x = checkpoint(self.convs[i], x, *args, **kwargs)
-            else:
-                x = self.convs[i](x, *args, **kwargs)
-
-            x = self.norms[i](x)
+            x = self.convs[i](x, edge_index, *args, **kwargs)
+            x = self.norms[i](x, *args, **kwargs)
 
             if i < self.block_size - 1:
                 x = F.relu(x) + self.eps
 
-        x = F.relu(intter + x) + self.eps
-        x = F.dropout(x, p=self.dropout, training=self.training)
+        x = h + x
+
+        x = self.exp_lin(x)
+        x = F.relu(x) + self.eps
+
+        return x
+
+class Encoder(torch.nn.Module):
+    def __init__(self, in_channels: int, out_channels: int, eps: float = 1e-5) -> None:
+        super().__init__()
+
+        self.eps = eps
+        self.mlp = MLP(channels=[in_channels, out_channels])
+
+    def forward(self, x: Tensor,  *args, **kwargs) -> Tensor:
+        x = self.mlp(x, *args, **kwargs)
 
         return x
 
 
 class Extractor(torch.nn.Module):
-    def __init__(self, hidden_channels: int, num_layers: int = 2, dropout: float = 0.0) -> None:
+    def __init__(self, hidden_channels: int, num_layers: int = 2) -> None:
         super().__init__()
 
-        self.dropout = dropout
         self.num_layers = num_layers
         self.hidden_channels = hidden_channels
         self.layers = ModuleList()
 
         for i in range(1, self.num_layers + 1):
-            layer = DeepGGALayer(hidden_channels, block_size=2, ckpt_grad=i % 3, dropout=dropout)
-            self.layers.append(layer)
+            self.layers.append(DeepGGALayer(hidden_channels, block_size=4))
+            hidden_channels = hidden_channels * 2
 
-    def forward(self, x: Tensor, edge_index: Tensor) -> Tensor:
+    def forward(self, x: Tensor, edge_index: Tensor, *args, **kwargs) -> Tensor:
         for i in range(self.num_layers):
-            x = self.layers[i](x, edge_index)
+            if x.requires_grad:
+                x = checkpoint(self.layers[i], x, edge_index, *args, **kwargs)
+            else:
+                x = self.layers[i](x, edge_index, *args, **kwargs)
 
         return x
 
 
 class Decoder(torch.nn.Module):
-    def __init__(self, hidden_channels: int, out_channels: int, num_heads: int = 8, dropout: float = 0.0, eps: float = 1e-7) -> None:
+    def __init__(self, hidden_channels: int, out_channels: int) -> None:
         super().__init__()
 
-        self.eps = eps
-        self.dropout = dropout
-        self.num_heads = num_heads
-        self.convs = ModuleList()
-        self.norms = ModuleList()
+        self.mlp = MLP(channels=[hidden_channels, hidden_channels * 4, out_channels], norm='pair')
 
-        self.mlp = MLP(channels=[hidden_channels, out_channels*num_heads, out_channels])
+    def forward(self, x: Tensor, edge_index: Tensor, *args, **kwargs) -> Tensor:
+        x = self.mlp(x, edge_index, *args, **kwargs)
 
-        for i in range(num_heads):
-            self.convs.append(GGAConv(hidden_channels, hidden_channels, hidden_channels))
-            self.norms.append(BatchNorm1d(hidden_channels, affine=True))
-
-    def forward(self, *args, **kwargs) -> Tensor:
-        args = list(args)
-        x: Tensor = args.pop(0)
-        _x: List[Tensor] = []
-
-        for i in range(self.num_heads):
-            intter = self.convs[i](x, *args, **kwargs)
-            intter = self.norms[i](intter)
-            intter = F.relu(intter) + self.eps
-            intter = F.dropout(intter, p=self.dropout, training=self.training)
-
-            _x.append(intter)
-
-        return self.mlp(sum(_x))
+        return x

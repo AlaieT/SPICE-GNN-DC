@@ -28,32 +28,40 @@ class CircuitData(Data):
 
 
 class CircuitDataset(Dataset):
-    def __init__(self, files_path: pd.DataFrame, train: bool = True, resave: bool = False, min_max_scaler_path: str = './dict/scaler/min_max.joblib', device: torch.device = torch.device('cpu')):
+    def __init__(
+        self,
+        file_path: str,
+        train: bool = True,
+        resave: bool = False,
+        show_progress: bool = True,
+        scaler_path: str = './dict/scaler/min_max.joblib',
+        device: torch.device = torch.device('cpu'),
+    ):
         super().__init__()
-        self.data = []
+        self.dataset = []
 
-        min_max_scaler = MinMaxScaler(feature_range=(0, 1)) if train else load(min_max_scaler_path)
+        data = pd.read_csv(file_path)
+        scaler = MinMaxScaler(feature_range=(0, 1)) if train else load(scaler_path)
         fit_x = torch.empty((0, 8)) if train else None
 
-        for _, row in tqdm(files_path.iterrows(), bar_format='{l_bar}{bar:20}{r_bar}{bar:-20b}', total=len(files_path)):
+        for _, row in tqdm(data.iterrows(), bar_format='{l_bar}{bar:20}{r_bar}{bar:-20b}', total=len(data), disable=not show_progress):
             x, target, edge_index, mask, max_voltage = spice_to_graph(row['Source'], row['Target'], resave=resave)
+            self.dataset.append(CircuitData(x=x, edge_index=edge_index, target=target, mask=mask, max_voltage=max_voltage).to(device, non_blocking=True))
 
             if train:
                 fit_x = torch.cat([fit_x, x], dim=0)
 
-            self.data.append(CircuitData(x=x, edge_index=edge_index, target=target, mask=mask, max_voltage=max_voltage).to(device))
+        if train:
+            scaler.fit(fit_x.cpu().numpy())
+
+        for data in self.dataset:
+            data.x = torch.tensor(scaler.transform(data.x.cpu().numpy()), dtype=torch.float, device=device)
 
         if train:
-            min_max_scaler.fit(fit_x.cpu().numpy())
-
-        for data in self.data:
-            data.x = torch.tensor(min_max_scaler.transform(data.x.cpu().numpy()), dtype=torch.float, device=device)
-
-        if train:
-            dump(min_max_scaler, min_max_scaler_path)
+            dump(scaler, scaler_path)
 
     def __len__(self) -> int:
-        return len(self.data)
+        return len(self.dataset)
 
     def __getitem__(self, idx: int) -> Data:
-        return self.data[idx]
+        return self.dataset[idx]
