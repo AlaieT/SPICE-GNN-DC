@@ -23,9 +23,9 @@ As described early to achieve hight value accurasy using standard math methods w
 Example: to achieve numbers accurate to two decimal places in PG with ~10k nodes needs at least 4h of modeling time.
 
 <p align='center'>
-<image src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/power_grid.jpg'/>
-<p align='center'>Power grid example.</p>
-<p>
+  <image src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/power_grid.jpg' width="400"/>
+  <p align='center'>Power grid example.</p>
+</p>
 
 ## Types of analysis
 
@@ -66,8 +66,19 @@ The proper way to represent circuit data - graph. Such representation can handle
 
 [GNN(Graph Neural Network)](https://en.wikipedia.org/wiki/Graph_neural_network) - can preform such tasks as: node classifiaction, node regeression, connection prediction, graph classification and e.t.c.
 
-<img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/model.jpg' alt='drawing' width='500'/>
+<p align='center'>
+  <img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/model.jpg' alt='drawing' width='300'/>
+  <p align='center'>Model architecture.</p>
+</p>
 
+### Model discription
+  - MLP layer encoding input features of `x`
+  - Save current state in `h`
+  - Use conv + relu + conv on `x`
+  - Use skipp connection `x=h+x`
+  - With linear layer expand number of features of `x` + relu
+  - MPL layer decoding output features of `x` in needed shape
+  
 ## Loss and Metric
 
 ### Loss
