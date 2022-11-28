@@ -1,7 +1,7 @@
 __author__ = 'Alaie Titor'
 __all__ = ['CircuitDataset']
 
-from typing import Any
+from typing import Any, Union
 from torch_geometric.typing import OptTensor
 
 import pandas as pd
@@ -10,6 +10,7 @@ from torch_geometric.data import Data, Dataset
 from tqdm import tqdm
 from sklearn.preprocessing import MinMaxScaler
 from joblib import dump, load
+import os
 
 from .reader import spice_to_graph
 
@@ -30,7 +31,7 @@ class CircuitData(Data):
 class CircuitDataset(Dataset):
     def __init__(
         self,
-        file_path: str,
+        file: Union[str, pd.DataFrame],
         train: bool = True,
         resave: bool = False,
         show_progress: bool = True,
@@ -40,7 +41,13 @@ class CircuitDataset(Dataset):
         super().__init__()
         self.dataset = []
 
-        data = pd.read_csv(file_path)
+        if file is str and not os.path.exists(file):
+            raise ValueError(f"Can't read from: {file}")
+
+        if not os.path.exists(scaler_path):
+            raise ValueError(f"Can't read from: {scaler_path}")
+
+        data = pd.read_csv(file) if file is str else file
         scaler = MinMaxScaler(feature_range=(-0.5, 0.5)) if train else load(scaler_path)
         fit_x = torch.empty((0, 8)) if train else None
 

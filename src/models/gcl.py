@@ -62,14 +62,12 @@ class DeepGGALayer(torch.nn.Module):
 
         for i in range(block_size):
             self.convs.append(GGAConv(hidden_channels, hidden_channels))
-            # self.norms.append(GraphNorm(hidden_channels))
 
     def forward(self, x: Tensor, edge_index: Tensor, *args, **kwargs) -> Tensor:
         h = x
 
         for i in range(self.block_size):
             x = self.convs[i](x, edge_index, *args, **kwargs)
-            # x = self.norms[i](x, *args, **kwargs)
 
             if i < self.block_size - 1:
                 x = F.relu(x) + self.eps
@@ -103,7 +101,7 @@ class Extractor(torch.nn.Module):
         self.layers = ModuleList()
 
         for i in range(1, self.num_layers + 1):
-            self.layers.append(DeepGGALayer(hidden_channels, block_size=4))
+            self.layers.append(DeepGGALayer(hidden_channels, block_size=8))
             hidden_channels = hidden_channels * 2
 
     def forward(self, x: Tensor, edge_index: Tensor, *args, **kwargs) -> Tensor:

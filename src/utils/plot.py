@@ -1,21 +1,15 @@
 __author__ = 'Alaie Titor'
-__all__ = ['plot_loss', 'plot_grad_flow', 'plot_surface_of_loss', 'plot_test']
+__all__ = ['plot_loss', 'plot_grad_flow', 'plot_surface_of_loss', 'plot_any_surface', 'plot_any_surface']
 
-import argparse
-import re
-from cmath import inf
-from copy import copy
-from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-import seaborn as sns
 from matplotlib import animation, cm
 from matplotlib.lines import Line2D
 from mpl_toolkits.mplot3d import Axes3D
 import os
 import torch
+from typing import Tuple, List
 
 
 def plot_grad_flow(named_parameters):
@@ -53,7 +47,7 @@ def plot_grad_flow(named_parameters):
     plt.savefig('./plots/grad.png', dpi=200)
 
 
-def plot_loss(dataset: np.ndarray, titles: list[str] = None, save_path: str = None):
+def plot_loss(dataset: np.ndarray, titles: List[str] = None, save_path: str = None):
     '''Plot graphs of provided data, created specialy for loss data...'''
 
     fig, axs = plt.subplots()
@@ -73,13 +67,21 @@ def plot_loss(dataset: np.ndarray, titles: list[str] = None, save_path: str = No
     plt.close()
 
 
-def plot_test(data_x: np.ndarray, data_y: np.ndarray, data_z: np.ndarray, save_path: str = None):
-    sns.heatmap(data=data_z, yticklabels=data_y, xticklabels=data_x, cmap='rocket')
+def plot_any_surface(data_x: np.ndarray, data_y: np.ndarray, data_z: np.ndarray, save_path: str = None, labels: Tuple[str, str, str] = ['' ,'', '']):
+    fig, axs = plt.subplots(subplot_kw={"projection": "3d"})
+
+    X, Y = np.meshgrid(data_x, data_y)
+
+    axs.plot_surface(X, Y, np.transpose(data_z), cmap=cm.coolwarm, linewidth=0, antialiased=False)
+    axs.set_xlabel(labels[0])
+    axs.set_ylabel(labels[1])
+    axs.set_zlabel(labels[2])
 
     if save_path is not None:
         plt.savefig(save_path)
     else:
         plt.show()
+    
     plt.close()
 
 

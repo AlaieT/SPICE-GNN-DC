@@ -66,10 +66,7 @@ The proper way to represent circuit data - graph. Such representation can handle
 
 [GNN(Graph Neural Network)](https://en.wikipedia.org/wiki/Graph_neural_network) - can preform such tasks as: node classifiaction, node regeression, connection prediction, graph classification and e.t.c.
 
-## Traning
-
-Training approach of GNN model is not so different from other neural networks.  
-Method of learning - [supervised learning](https://en.wikipedia.org/wiki/Supervised_learning).
+<img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/model.png' alt='drawing' width='500'/>
 
 ## Loss and Metric
 
@@ -112,20 +109,39 @@ List of available scripts:
    `python ./src/analysis.py -ch -p ./assets/train/ibmpg0/ibmpg0.csv`,  
    `python ./src/analysis.py -ls -p ./assets/train.csv`
 
-## Illustrations of results
+## Results
 
-### Train loss, Acc@1 metrick, Acc@2 metrik
+Epochs: 100  
+Optimizer: AdamW(lr=1e-4, weight_decay=1e-5)  
+Scheduler: ExponentialLR(optimizer, gamma=1-1e-6)  
+Criterion: L2Error
+
+`Fold0`: All values in range of train dataset  
+`Fold1`: Voltage values out of range of train dataset  
+`Fold2`: Cells number out of range of train dataset  
+`Fold3`: Voltage values and  Cells numbers out of range of train dataset  
+
+Metric | Fold0 | Fold1 | Fold2 | Fold3
+--- | --- | --- | --- |--- 
+Acc@1  | 0% | 0% | 0.377% | 0.31723%
+Acc@2  | 11.884% | 11.611% | 61.999% | 62.399%
+MAPE  | 0.35701% | 0.36849% | 1.5052% | 1.5032%
+
+### MAPE, Acc@1 metrick, Acc@2 metrik
 
 <p float="left">
-  <img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/train.png' alt='drawing' width='250'/>
+  <img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/mape.png' alt='drawing' width='250'/>
   <img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/acc1.png' alt='drawing' width="250"/>
   <img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/acc2.png' alt='drawing' width="250"/>
 </p>
 
-### L2Error loss surface
+### L2Error contour and loss surface
 
-<img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/deep_nn_loss_log_surface.gif' alt='drawing' width='500'/>
-                   
+<p float="left">
+  <img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/deep_nn_loss_log_surface.gif' alt='drawing' width='350'/>
+  <img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/deep_nn_loss_log_contour.png' alt='drawing' width='350'/>
+</p>
+
 ## Tasks
 
 - Find best set of parameters for model
