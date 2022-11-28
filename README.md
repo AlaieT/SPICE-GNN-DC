@@ -109,15 +109,12 @@ If `(x - y)` rounded to k presission is larger then 0 its return 1 otherwise 0.
 List of available scripts:
 
 - src/generator.py - allows to generate dataset.  
-  Usage example - `python ./src/generator.py -m train -vr 500 1020 20 -cr 1 11 1 -rr 100 520 20 -nl 4`
+  Usage example - `python ./src/generator.py -m fold0_big -vr 510 1020 60 -cr 4 20 3 -rr 110 520 60 -nl 2`
 - src/train.py - allows to train model.  
-  Usage example - `python ./src/train.py -f ./assets/train.csv -e 500 -bt 128 -bv 128 -r`
-- src/test.py - allows to run test on several folds.  
-  Usage example - `python ./src/test.py -f ./assets/test_fold1.csv ./assets/test_fold2.csv -mp ./dict/dnn/best.pt -bs 256 -r`
+  Usage example - `python ./src/train.py -ft ./assets/train_exp.csv -fv ./assets/fold0_exp.csv ./assets/fold1_exp.csv ./assets/fold2_exp.csv ./assets/fold3_exp.csv -e 1000 -bt 32 -bv 64`
 - src/analysis.py - allows to analysis data: statistics of generated data, heatmap of circtui ground truth and plot loss surface of model.  
   Usage examples:  
-   `python ./src/analysis.py -gd -p ./assets/train.csv`,  
-   `python ./src/analysis.py -ch -p ./assets/train/ibmpg0/ibmpg0.csv`,  
+   `python ./src/analysis.py -gd -p ./assets/train.csv`, 
    `python ./src/analysis.py -ls -p ./assets/train.csv`
 
 ## Results
