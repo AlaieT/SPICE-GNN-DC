@@ -23,7 +23,7 @@ As described early to achieve hight value accurasy using standard math methods w
 Example: to achieve numbers accurate to two decimal places in PG with ~10k nodes needs at least 4h of modeling time.
 
 <p align='center'>
-<image src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/power_grid.png'/>
+<image src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/power_grid.jpg'/>
 <p align='center'>Power grid example.</p>
 <p>
 
@@ -66,7 +66,7 @@ The proper way to represent circuit data - graph. Such representation can handle
 
 [GNN(Graph Neural Network)](https://en.wikipedia.org/wiki/Graph_neural_network) - can preform such tasks as: node classifiaction, node regeression, connection prediction, graph classification and e.t.c.
 
-<img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/model.png' alt='drawing' width='500'/>
+<img src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/model.jpg' alt='drawing' width='500'/>
 
 ## Loss and Metric
 
