@@ -126,13 +126,9 @@ If `(x - y)` rounded to k presission is larger then 0 its return 1 otherwise 0.
 Dataset | Voltage, mV | Resitance, mOm | Cells | Count
 --- | --- | --- | --- |--- 
 Train dataset | 500-1000  mV | 4 - 100  | 100 - 500 mOm | 27301  
-
 Fold0 dataset | 500-1000  mV | 4 - 100  | 100 - 500 mOm | 3151  
-
 Fold1 dataset | 1000-1500 mV | 4 - 100  | 100 - 500 mOm | 3149  
-
 Fold2 dataset | 1000-1000 mV | 110 - 216 | 100 - 500 mOm | 2015  
-
 Fold3 dataset | 1000-1500 mV | 110 - 216 | 100 - 500 mOm | 2017  
 
 P.S. Train dataset generated with different range step then folds. 
