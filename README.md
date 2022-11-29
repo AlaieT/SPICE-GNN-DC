@@ -191,13 +191,13 @@ List of available scripts:
   Usage example - `python ./src/train.py -ft ./assets/train_exp.csv -fv ./assets/fold0_exp.csv ./assets/fold1_exp.csv -e 1000 -bt 32 -bv 64`
   
 - src/analysis.py - allows to analysis data: statistics of generated data, heatmap of circtui ground truth and plot loss surface of model.  
-  -gd - analysis of generated data, max-min-mean voltage dropout in datases
-  -ls - plot loss surface of model
-  -p - path to valid or trian csv file
-  -m - path to model checkpoint file
+  -gd - analysis of generated data, max-min-mean voltage dropout in datases  
+  -ls - plot loss surface of model  
+  -p - path to valid or trian csv file  
+  -m - path to model checkpoint file  
 
   Usage examples:  
-   `python ./src/analysis.py -gd -p ./assets/train.csv`, 
+   `python ./src/analysis.py -gd -p ./assets/train.csv`,  
    `python ./src/analysis.py -ls -p ./assets/train.csv`
    
 ## Tasks
