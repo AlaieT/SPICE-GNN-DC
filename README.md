@@ -19,8 +19,10 @@ To simplify this project we wil be using circtuits that doesn't have transistors
 
 IC usialy splits by two parts: power grid and transistors on cristal.Power gird is used for transfer voltage to all transistors on cristal.The main porblem of power grid - voltage drop out can be too hight in some places of grid. So the main purpose of modeling power grid it is find all area where voltage drop out is higher than some threshold value.  
 
-As described early to achieve hight value accurasy using standard math methods we need a lot of time.
+As described early to achieve hight value accurasy using standard math methods we need a lot of time.  
 Example: to achieve numbers accurate to two decimal places in PG with ~10k nodes needs at least 4h of modeling time.
+
+`The goal of the project is to create a model that can significantly reduce simulation time with minimal loss in the accuracy of the numbers.`
 
 <p align='center'>
   <image src='https://github.com/AlaieT/SPICE-GNN/blob/main/picts/power_grid.jpg' width="400"/>
@@ -114,7 +116,11 @@ Where x - predicted values, y - ground truth values and p - model parameters(aka
 
 We whant to recive hight accurasy values from model, then we have properly validate it.  
 The best wariant is use so called `Acc@k` or top k accurasy metric.  
-This metric used in multy label calssification tasks, but i rebuilded it to our porpuses.
+This metric used in multy label calssification tasks, but i rebuilded it to our porpuses.  
+The point of this function is to show the error in the accuracy of numbers up to a specific number of digits after the decimal point.
+The lower metric score the better result.
+
+Example: Acc@1(5.567 and 5.423) = 1, Acc@2(3.2543 and 3.2521) = 0.
 
 ![](https://github.com/AlaieT/SPICE-GNN/blob/main/picts/metric.jpg)
 
@@ -152,6 +158,40 @@ Metric | Fold0 | Fold1 | Fold2 | Fold3
 Acc@1  | 0% | 0% | 0.377% | 0.31723%
 Acc@2  | 11.884% | 11.611% | 61.999% | 62.399%
 MAPE  | 0.35701% | 0.36849% | 1.5052% | 1.5032%
+
+Lest remeber goal of this porject - `The goal of the project is to create a model that can significantly reduce simulation time with minimal loss in the accuracy of the numbers.`  
+
+Acc@1 - this metric means that the model can predict values to at least 1 digit after the decimal point, the lower the better.  
+Acc@2 - this metric means that the model can predict values to at least 2 digit after the decimal point, the lower the better.  
+MAPE - this metric means that the model can predict values with some percentage accurasy, the lower the better.  
+
+We have 4 fold to test the capabilities of created model.  
+
+Looking at the results of the validation we can make several conclusions about the resulting model:
+ - The error is small in the area of training values  
+ - Increasing the voltage scale has almost no effect on the error value  
+ - Increasing the size of circuits greatly affects the accuracy of calculations  
+ 
+Average circuit simulation time using standard mathematical methods is on average equal to 1h:30m(approximate time).  
+The average simulation time of circuits when using the resulting model is on average equal to 0h:3m:42s(approximate time).
+
+Let's do some simple calculations:
+
+Tm - simulation time using standard mathematical methods.  
+Tnn - simulation time using nn model.  
+Td = Tm/Tnn ~= 22 times.  
+
+AvgAcc@1 = 0.174%  
+AvgAcc@2 = 36.97%  
+AvgMAPE = 0.933%  
+
+Let's choose AvgMAPE as well as the ratio of time Td.  
+So using model, we can reduce the simulation time by a factor of 22, but we will get an error of 0.933% of MAPE in average.
+It turns out a significant reduction in time for a small error.  
+
+This model can perform better with a larger data set and better training parameters.  
+But even now we can say that the use of neural networks to reduce the development and testing time of integrated circuits can significantly increase the productivity of the development of new devices.
+
 
 ### MAPE, Acc@1 metrick, Acc@2 metrik
 
